@@ -1,0 +1,6 @@
+#!/bin/bash
+
+source curriculum-scripts.sh
+source ${cse335scripts}/.venv/bin/activate
+python3 ${cse335scripts}/classes-by-term-cleanup.py "$@"
+
