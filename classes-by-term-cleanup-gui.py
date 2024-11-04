@@ -117,7 +117,7 @@ class ClassesByTerm(App):
                   ['^\\s*3', '80ff80', 'cfffcf'],
                   ['^\\s*490', 'ffffff', 'ffffff'],
                   ['^\\s*498', 'ff8080', 'ff8080'],
-                  ['^\\s*4', 'ff8093', 'ffe0e5']]
+                  ['^\\s*4', '80dbff', 'd9f4ff']]
         cancelled_color = '888888'
         catalog = headings.index('Catalog')
         enrl_status = headings.index('Enrl Stat')
@@ -125,6 +125,7 @@ class ClassesByTerm(App):
         for row in range(2, sheet.max_row + 1):
             course = sheet[row][catalog]
             color_to_use = 'ffffff'
+            font_color = None
 
             for color in colors:
                 if re.search(color[0], course.value) is not None:
@@ -137,18 +138,20 @@ class ClassesByTerm(App):
                 status = sheet[row][class_status].value
                 if status.startswith('Cancelled') or status.startswith('Stop Further'):
                     color_to_use = cancelled_color
+                    font_color = '888888'
                 elif enrl_status is not None:
                     e_status = sheet[row][enrl_status].value
                     if e_status.startswith('Closed'):
-                        for rows1 in sheet.iter_rows(min_row=row, max_row=row, min_col=1, max_col=len(headings)):
-                            for cell in rows1:
-                                new_font = copy(cell.font)
-                                new_font.color = 'ff0000'
-                                cell.font = new_font
+                        font_color = 'ff0000'
 
             for rows1 in sheet.iter_rows(min_row=row, max_row=row, min_col=1, max_col=len(headings)):
                 for cell in rows1:
                     cell.fill = PatternFill(start_color=color_to_use, end_color=color_to_use, fill_type="solid")
+
+                    if font_color is not None:
+                        new_font = copy(cell.font)
+                        new_font.color = font_color
+                        cell.font = new_font
 
 
         # Sort the rows
