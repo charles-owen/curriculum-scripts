@@ -14,6 +14,42 @@ import warnings
 import time
 import os
 
+def sheet_sort_rows(ws, row_start, row_end=0, cols=None, sorter=None, reverse=False):
+    """ Sorts given rows of the sheet
+        From: https://stackoverflow.com/questions/44767554/sorting-with-openpyxl
+        row_start   First row to be sorted
+        row_end     Last row to be sorted (default last row)
+        cols        Columns to be considered in sort
+        sorter      Function that accepts a tuple of values and
+                    returns a sortable key
+        reverse     Reverse the sort order
+    """
+
+    bottom = ws.max_row
+    if row_end == 0:
+        row_end = ws.max_row
+    right = get_column_letter(ws.max_column)
+    if cols is None:
+        cols = range(1, ws.max_column + 1)
+
+    array = {}
+    for row in range(row_start, row_end + 1):
+        key = ''
+        for col in cols:
+            key += ws.cell(row, col).value
+        array[key] = array.get(key, set()).union({row})
+
+    order = sorted(array, key=sorter, reverse=reverse)
+
+    ws.move_range(f"A{row_start}:{right}{row_end}", bottom)
+    dest = row_start
+    for src_key in order:
+        for row in array[src_key]:
+            src = row + bottom
+            dist = dest - src
+            ws.move_range(f"A{src}:{right}{src}", dist)
+            dest += 1
+
 class ClassesByTerm(App):
     def __init__(self):
         super(ClassesByTerm, self).__init__(title="Classes By Term", width=300, height=200)
@@ -94,6 +130,9 @@ class ClassesByTerm(App):
                 if gotIt:
                     break
 
+        # Sort the rows
+        sheet_sort_rows(sheet, 2, sheet.max_row, [3, 4, 2])
+
         # Set the sheet zoom level
         sheet.sheet_view.zoomScale = 135
 
@@ -115,6 +154,9 @@ class ClassesByTerm(App):
         wb.save(output_file)
 
         app.info("Success", "File successfully saved as " + filename)
+
+
+
 
 
 #
