@@ -13,6 +13,7 @@ import re
 import warnings
 import time
 import os
+from copy import copy
 
 def sheet_sort_rows(ws, row_start, row_end=0, cols=None, sorter=None, reverse=False):
     """ Sorts given rows of the sheet
@@ -109,26 +110,46 @@ class ClassesByTerm(App):
             else:
                 print(f'Column {width[0]} not found')
 
-        colors = [['^\\s*102', 'fffa80'], ['^\\s*220', 'e0e0e0'], ['^\\s*231', 'ffcc80'], ['^\\s*232', 'ff80e6'],
-                  ['^\\s*260', '808dff'], ['^\\s*3', '80ff80'], ['^\\s*490', 'ffffff'],
-                  ['^\\s*498', 'ff8080'], ['^\\s*4', 'ff8093']]
+        colors = [['^\\s*102', 'fffa80', 'faf8c5'], ['^\\s*220', 'e0e0e0', 'e0e0e0'],
+                  ['^\\s*231', 'ffcc80', 'ffcc80'],
+                  ['^\\s*232', 'ff80e6', 'ffcff5'],
+                  ['^\\s*260', '808dff', '808dff'],
+                  ['^\\s*3', '80ff80', 'cfffcf'],
+                  ['^\\s*490', 'ffffff', 'ffffff'],
+                  ['^\\s*498', 'ff8080', 'ff8080'],
+                  ['^\\s*4', 'ff8093', 'ffe0e5']]
+        cancelled_color = '888888'
         catalog = headings.index('Catalog')
+        enrl_status = headings.index('Enrl Stat')
+        class_status = headings.index('Class Stat')
         for row in range(2, sheet.max_row + 1):
             course = sheet[row][catalog]
-            # print(f'"{course.value}"')
-            gotIt = False
+            color_to_use = 'ffffff'
+
             for color in colors:
                 if re.search(color[0], course.value) is not None:
-                    # print(f'Set {course.value} to {color[1]}')
-                    gotIt = True
-
-                    for rows1 in sheet.iter_rows(min_row=row, max_row=row, min_col=1, max_col=len(headings)):
-                        for cell in rows1:
-                            cell.fill = PatternFill(start_color=color[1], end_color=color[1], fill_type="solid")
+                    color_to_use = color[1]
+                    cancelled_color = color[2]
                     break
 
-                if gotIt:
-                    break
+            # Test for cancelled sections
+            if class_status is not None:
+                status = sheet[row][class_status].value
+                if status.startswith('Cancelled') or status.startswith('Stop Further'):
+                    color_to_use = cancelled_color
+                elif enrl_status is not None:
+                    e_status = sheet[row][enrl_status].value
+                    if e_status.startswith('Closed'):
+                        for rows1 in sheet.iter_rows(min_row=row, max_row=row, min_col=1, max_col=len(headings)):
+                            for cell in rows1:
+                                new_font = copy(cell.font)
+                                new_font.color = 'ff0000'
+                                cell.font = new_font
+
+            for rows1 in sheet.iter_rows(min_row=row, max_row=row, min_col=1, max_col=len(headings)):
+                for cell in rows1:
+                    cell.fill = PatternFill(start_color=color_to_use, end_color=color_to_use, fill_type="solid")
+
 
         # Sort the rows
         sheet_sort_rows(sheet, 2, sheet.max_row, [3, 4, 2])
