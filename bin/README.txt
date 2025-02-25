@@ -1,1 +1,1 @@
-Example files to put in binary path. Set the path in curriculum-scripts.sh to point to this content.
+    Example  files to pn binary path. Set the path in curriculum-scripts.sh to point to this content.ut i
