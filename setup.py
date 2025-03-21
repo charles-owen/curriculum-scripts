@@ -4,7 +4,7 @@ setup(
     name='Curriculum Scripts',
     version='0.01',
     packages=[''],
-    install_requires=['docopt', 'openpyxl', 'guizero'],
+    install_requires=['docopt', 'openpyxl', 'guizero', 'python-docx'],
     url='',
     license='',
     author='charlesowen',

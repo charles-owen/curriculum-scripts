@@ -1,3 +1,4 @@
+
 """
 Usage:
     vitae [-h|--help] [--program=<program>] <faculty_xml>
