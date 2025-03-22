@@ -39,7 +39,7 @@ def sheet_sort_rows(ws, row_start, row_end=0, cols=None, sorter=None, reverse=Fa
         for col in cols:
             key += ws.cell(row, col).value
         array[key] = array.get(key, set()).union({row})
-    order = s0orted(array, key=sorter, reverse=reverse)
+    order = sorted(array, key=sorter, reverse=reverse)
 
     ws.move_range(f"A{row_start}:{right}{row_end}", bottom)
     dest = row_start
